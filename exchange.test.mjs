@@ -1,27 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { DatabaseSync } from 'node:sqlite';
+import { createLocalDatabase } from './local-db.mjs';
 import app from './dist/server/index.js';
 
 test('review exchange, listing eligibility, and private founder feedback', async () => {
-  const sqlite = new DatabaseSync(':memory:');
-  const db = {
-    prepare(sql) {
-      let bindings = [];
-      const statement = () => sqlite.prepare(sql.replaceAll('?1', ':person'));
-      const params = () => sql.includes('?1') ? [{person: bindings[0]}] : bindings;
-      return {
-        bind(...values) { bindings = values; return this; },
-        run() { return statement().run(...params()); },
-        all() { return {results: statement().all(...params())}; },
-        first(key) {
-          const result = statement().get(...params());
-          return key ? result?.[key] : result;
-        },
-      };
-    },
-    batch(statements) { return statements.map(s => s.run()); },
-  };
+  const db = createLocalDatabase();
   const origin = 'https://pitchadda.example';
   function api(user, body) {
     const headers = {Origin: origin};
@@ -45,5 +28,5 @@ test('review exchange, listing eligibility, and private founder feedback', async
   assert.equal(product.waits,1);
   assert.equal(product.feedback[0].rating,4);
   assert.deepEqual((await (await api('peer')).json()).products[0].feedback,[]);
-  sqlite.close();
+  db.close();
 });

@@ -1,0 +1,11 @@
+{
+  "name": "pitchadda",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=24" },
+  "scripts": {
+    "dev": "node build.mjs && node dev-server.mjs",
+    "build": "node build.mjs",
+    "test": "node build.mjs && node --test exchange.test.mjs"
+  }
+}
