@@ -21,7 +21,7 @@ export default {async fetch(req,env){
  const count=async()=>Number(await db.prepare('SELECT COUNT(*) FROM reviews WHERE person=?').bind(user||'').first('COUNT(*)'));
  if(req.method==='GET'){
  const {results}=await db.prepare(`SELECT p.*, (SELECT count(*) FROM reviews WHERE product=p.id) total,(SELECT round(avg(rating),1) FROM reviews WHERE product=p.id) avg,(SELECT count(*) FROM waits WHERE product=p.id) waits, EXISTS(SELECT 1 FROM reviews WHERE product=p.id AND person=?1) done, EXISTS(SELECT 1 FROM waits WHERE product=p.id AND person=?1) joined FROM products p ORDER BY owner IS NULL, CASE WHEN owner IS NULL THEN id ELSE -id END`).bind(user||'').all();
- const products=await Promise.all(results.map(async({owner,...p})=>({...p,questions:JSON.parse(p.questions),mine:!!user&&owner===user,seed:owner===null,feedback:user&&owner===user?(await db.prepare('SELECT note,intent,answers FROM reviews WHERE product=? ORDER BY rowid DESC').bind(p.id).all()).results:[]})));
+ const products=await Promise.all(results.map(async({owner,...p})=>({...p,questions:JSON.parse(p.questions),mine:!!user&&owner===user,seed:owner===null,feedback:user&&owner===user?(await db.prepare('SELECT note,rating,intent,answers FROM reviews WHERE product=? ORDER BY rowid DESC').bind(p.id).all()).results:[]})));
  return Response.json({products,count:await count()},{headers:{'Cache-Control':'private, no-store'}})}
  if(req.method!=='POST')return fail('Unsupported method',405);
  if(!user)return fail('Sign in to participate.',401);
