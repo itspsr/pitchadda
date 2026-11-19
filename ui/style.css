@@ -15,3 +15,6 @@ dialog{width:min(540px,94vw);border:1px solid var(--line);border-radius:18px;max
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 .generic-cover{height:140px;background:linear-gradient(115deg,#dce3ff,#c0d5f3);display:grid;place-items:center}.generic-cover i{font:italic 58px/1 Georgia,serif;color:#2b427e;transform:rotate(-12deg);text-shadow:1px 2px #fff,2px 4px #9aaad9}
 @media(hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){.card .cover>div{transition:translate .3s,scale .3s}.card:hover .cover>div,.card:focus-within .cover>div{translate:0 -4px;scale:1.06}}
+.site-footer{justify-content:space-between;align-items:flex-start;gap:1.5rem;flex-wrap:wrap}.site-footer p{margin:2px 0 0}.footer-links{display:flex;gap:8px 20px;flex-wrap:wrap;align-self:center}.footer-links a{color:var(--muted);text-underline-offset:4px;font-size:.9rem}.footer-links a:hover{color:var(--blue)}.account-cta{display:inline-block;padding:.6rem 1rem;text-decoration:none;border-radius:8px;font-weight:650}
+@media(max-width:740px){.header-inner{gap:1rem}.header-inner nav{gap:.75rem}.site-footer{display:grid}}
+@media(max-width:500px){.header-inner{flex-wrap:wrap;padding-block:10px}.header-inner nav{order:2;width:100%}.header-cta{order:1}}

@@ -98,7 +98,7 @@
 .flight-dots { display:flex; gap:3%; height:5%; align-items:center; }
 .flight-dots i { width:3%; aspect-ratio:1; border-radius:50%; background:#a4b4ce; }
 .flight-dots i:first-child { background:#fa8659; }
-.flight-stars { 
+.flight-stars {
   color: #304997;
   font-family: Arial,sans-serif;
   font-weight: 800;

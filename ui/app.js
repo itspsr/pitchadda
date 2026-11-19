@@ -2,7 +2,7 @@ const page = document.querySelector('#page');
 const modal = document.querySelector('#modal');
 const message = document.querySelector('#message');
 const covers = [...document.querySelector('#covers').content.children];
-const flight = document.querySelector('#flight').innerHTML;
+const homeHero = page.querySelector('.hero').outerHTML;
 let state;
 let category = '';
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'}[c]));
@@ -31,17 +31,18 @@ function progress() {
 function render() {
   if (!state) return;
   const mine = dashboard();
+  document.querySelector('[data-account]').textContent = state.signedIn ? 'Account' : 'Log in';
   document.querySelectorAll('nav a').forEach(a => {
     if (a.hash === (mine ? '#dashboard' : '#discover')) a.setAttribute('aria-current','page');
     else a.removeAttribute('aria-current');
   });
+  if (mine && !state.signedIn) {
+    page.innerHTML='<section class="dash"><h1>Founder dashboard</h1><p>Log in to see your listings, reviews and waitlist activity.</p><a class="primary account-cta" href="/account">Log in</a></section>';
+    return;
+  }
   const categories = ['', ...new Set(state.products.map(p => p.category))];
   const list = state.products.filter(p => mine ? p.mine : !category || p.category === category);
-  const hero = `<section class="hero"><div class="hero-copy"><p class="kicker">FOUNDER FEEDBACK EXCHANGE</p>
-    <h1>Your next idea,<br><em>peer reviewed.</em></h1>
-    <p>Get fresh eyes on your product from India’s founder community. Start by giving feedback of your own.</p>
-    <a class="hero-button" href="#directory">Explore products</a></div>${flight}</section>`;
-  page.innerHTML = (mine ? '<section class="dash"><h1>Founder dashboard</h1></section>' : hero) + progress() +
+  page.innerHTML = (mine ? '<section class="dash"><h1>Founder dashboard</h1></section>' : homeHero) + progress() +
     `<section id="directory"><div class="directory-head"><h2>${mine?'Your products':'Product directory'}</h2>
     <span>${list.length} ${list.length===1?'product':'products'}</span></div>` +
     (mine ? '' : `<div class="filters" role="group" aria-label="Filter products by category">${categories.map((c,i)=>
@@ -60,6 +61,10 @@ function field(name, label, type='text', max=300) {
 }
 function listing() {
   if (!state) return;
+  if (!state.signedIn) {
+    openBox('List your product', '<p>Log in to track review credit and publish your listing.</p><a class="primary account-cta" href="/account">Log in</a>');
+    return;
+  }
   if (state.count < 3) {
     const left = 3 - state.count;
     openBox('Unlock your listing', `<p>Review ${left} more ${left===1?'product':'products'} to publish your own brief.</p><button class="primary" data-explore>Explore products</button>`);
@@ -73,6 +78,10 @@ function detail(id) {
   const p = state.products.find(product => product.id === id);
   if (!p) return;
   const introduction = `<p>${esc(p.description)}</p>` + (p.url ? `<a target="_blank" rel="noopener noreferrer" href="${esc(p.url)}">Visit product website</a>` : '<p class="tag">Practice brief · Review the concept described above.</p>');
+  if (!state.signedIn) {
+    openBox(p.name,introduction + '<p>Log in to write a review or join the waitlist.</p><a class="primary account-cta" href="/account">Log in</a>');
+    return;
+  }
   if (p.mine) {
     const comments = p.feedback.map(f => `<div class="feedback"><strong>${esc(f.note)}</strong><p><small>${esc(f.rating)} / 5 · ${esc(f.intent)}</small></p>
       ${JSON.parse(f.answers).map((answer,i) => `<p><b>${esc(p.questions[i])}</b><br>${esc(answer)}</p>`).join('')}</div>`).join('');
