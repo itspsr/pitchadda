@@ -5,6 +5,7 @@ const infoPages = new Map([
     title: 'About PitchAdda',
     intro: 'PitchAdda gives independent founders in India a place to test an idea with people who are building products of their own.',
     sections: [
+      ['Finding a launch', 'Search the launch board by product name, category or description. Choose Early access to find products looking for testers, or Top voted to see community favorites. Open a product’s name for its shareable page.'],
       ['How the exchange works', 'Choose a product, answer the founder’s questions and share a rating. After reviewing three different products, you can list yours with a link, a short description and up to three questions.'],
       ['What founders learn', 'Your dashboard brings together ratings, written responses and waitlist interest. Read the answers alongside the numbers to understand what someone found useful, what confused them and what they would change.'],
       ['Start with a practice brief', 'Products marked “Practice brief” are sample concepts. Review the description and questions to try the exchange before posting your own listing.']
@@ -28,6 +29,7 @@ const infoPages = new Map([
     sections: [
       ['Your account', 'Sites supports sign-in with ChatGPT. If email sign-in is enabled, Supabase uses your email address to send a sign-in link and verify the session. PitchAdda uses an account identifier to associate listings, reviews and waitlist choices with you, count completed reviews and prevent duplicate submissions. Signing out ends your session. Your submissions stay in the exchange.'],
       ['Product listings', 'People with access to the directory can see a product’s name, category, description, website link and questions. Include only information you have permission to share.'],
+      ['Upvotes', 'You can upvote another founder’s listing or remove your vote. PitchAdda stores the vote with your account identifier so each account counts once per product. Visitors see the total on the launch board.'],
       ['Reviews and waitlists', 'The product’s founder can read your written feedback, answers, rating and stated interest in using or paying for the product. The exchange also calculates review totals, average ratings and waitlist counts. Personal information you type into a response can be visible to that founder.'],
       ['Hosting and sign-in services', 'Sites delivers the application. A Cloudflare D1 database stores product listings, reviews and waitlist records linked to account identifiers. Session credentials are used to recognize a signed-in visitor. Websites linked from a product listing have their own privacy practices.'],
       ['Exporting your data', 'Sign in to Account and choose Download my data to get a copy of your own exchange records.', '/account', 'Open account'],

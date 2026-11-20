@@ -4,7 +4,8 @@ const message = document.querySelector('#message');
 const covers = [...document.querySelector('#covers').content.children];
 const homeHero = page.querySelector('.hero').outerHTML;
 let state;
-let category = '';
+const feedDefaults = {query:'', stage:'', category:'', sort:'latest'};
+const feedOptions = {...feedDefaults};
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'}[c]));
 const dashboard = () => location.hash === '#dashboard';
 async function sync() {
@@ -40,16 +41,41 @@ function render() {
     page.innerHTML='<section class="dash"><h1>Founder dashboard</h1><p>Log in to see your listings, reviews and waitlist activity.</p><a class="primary account-cta" href="/account">Log in</a></section>';
     return;
   }
-  const categories = ['', ...new Set(state.products.map(p => p.category))];
-  const list = state.products.filter(p => mine ? p.mine : !category || p.category === category);
-  page.innerHTML = (mine ? '<section class="dash"><h1>Founder dashboard</h1></section>' : homeHero) + progress() +
-    `<section id="directory"><div class="directory-head"><h2>${mine?'Your products':'Product directory'}</h2>
-    <span>${list.length} ${list.length===1?'product':'products'}</span></div>` +
-    (mine ? '' : `<div class="filters" role="group" aria-label="Filter products by category">${categories.map((c,i)=>
-      `<button data-category="${i}" aria-pressed="${category===c}">${esc(c || 'All products')}</button>`).join('')}</div>`) +
-    `<div class="grid ${mine?'dashboard-grid':''}">${list.map(card).join('')}</div>` +
-    (list.length ? '' : '<p class="empty">Your listings and their feedback will appear here.</p>') + '</section>';
+  if (mine) {
+    const owned = state.products.filter(p => p.mine);
+    page.innerHTML = '<section class="dash"><h1>Founder dashboard</h1></section>' + progress() +
+      '<section><div class="directory-head"><h2>Your products</h2></div><div class="grid dashboard-grid">' +
+      owned.map(card).join('') + '</div>' + (owned.length ? '' : '<p class="empty">Your listings and their feedback will appear here.</p>') + '</section>';
+    return;
+  }
+  page.innerHTML = homeHero + '<div class="discovery-layout"><div id="feed-root"></div>' +
+    '<aside class="board-aside" aria-label="Founder resources">' + progress() +
+    '<div class="board-guide"><h2>How the exchange works</h2><ol><li>Try a product and answer the founder’s questions.</li><li>Review three products to unlock your listing.</li><li>Track interest and feedback in your dashboard.</li></ol><a href="/help">Visit the help center</a></div></aside></div>';
+  renderFeed();
 }
+function renderFeed() {
+  document.querySelector('#feed-root').innerHTML = discoveryFeed(state.products, {...feedOptions,signedIn:state.signedIn});
+}
+function restoreFeedFocus(selector) {
+  page.querySelector(selector)?.focus({preventScroll:true});
+}
+page.addEventListener('input', event => {
+  if (!event.target.matches('[data-feed-query]') || event.isComposing) return;
+  feedOptions.query = event.target.value;
+  const caret = event.target.selectionStart;
+  renderFeed();
+  const field = page.querySelector('[data-feed-query]');
+  field.focus({preventScroll:true});
+  if (caret !== null) field.setSelectionRange(caret, caret);
+});
+page.addEventListener('change', event => {
+  const control = event.target;
+  if (!control.matches('[data-feed-sort],[data-feed-category]')) return;
+  const isSort = control.hasAttribute('data-feed-sort');
+  feedOptions[isSort ? 'sort' : 'category'] = control.value;
+  renderFeed();
+  restoreFeedFocus(isSort ? '[data-feed-sort]' : '[data-feed-category]');
+});
 function openBox(title, body) {
   document.querySelector('#dialog-title').textContent = title;
   document.querySelector('#dialog-content').innerHTML = body;
@@ -71,7 +97,7 @@ function listing() {
     return;
   }
   openBox('List your product', `<form data-action="list">${field('name','Product name','text',80)}${field('url','Website URL','url')}
-    ${field('category','Category','text',40)}${field('description','One-line description')}${field('q1','First question for reviewers')}${field('q2','Second question for reviewers')}
+    <label>Launch stage<select name="stage"><option>Early access</option><option>Launched</option></select></label>${field('category','Category','text',40)}${field('description','One-line description')}${field('q1','First question for reviewers')}${field('q2','Second question for reviewers')}
     <label>Third question (optional)<input name="q3" maxlength="300"></label><button class="primary">Publish listing</button></form>`);
 }
 function detail(id) {
@@ -85,7 +111,7 @@ function detail(id) {
   if (p.mine) {
     const comments = p.feedback.map(f => `<div class="feedback"><strong>${esc(f.note)}</strong><p><small>${esc(f.rating)} / 5 · ${esc(f.intent)}</small></p>
       ${JSON.parse(f.answers).map((answer,i) => `<p><b>${esc(p.questions[i])}</b><br>${esc(answer)}</p>`).join('')}</div>`).join('');
-    openBox(p.name, introduction + `<div class="stats">${p.total} reviews · ${p.avg??'—'} / 5 · ${p.waits} on waitlist</div>${comments}`);
+    openBox(p.name, introduction + `<p><a href="/p/${id}">Open product page</a></p><form data-action="set-stage" data-id="${id}"><label>Launch stage<select name="stage">${['Early access','Launched'].map(s=>'<option '+(p.stage===s?'selected':'')+'>'+s+'</option>').join('')}</select></label><button>Save launch stage</button></form><div class="stats">${p.votes} upvotes · ${p.total} reviews · ${p.avg??'—'} / 5 · ${p.waits} on waitlist</div>${comments}`);
     return;
   }
   openBox(p.name, introduction + `<p><button data-join="${id}" ${p.joined?'disabled':''}>${p.joined?'Joined waitlist':'Join waitlist'}</button></p>` +
@@ -105,10 +131,28 @@ document.addEventListener('click', async event => {
   if (!button) return;
   if (button.hasAttribute('data-list')) return listing();
   if (button.hasAttribute('data-product')) return detail(Number(button.dataset.product));
-  if (button.hasAttribute('data-category')) {
-    category = ['', ...new Set(state.products.map(p=>p.category))][Number(button.dataset.category)];
-    render();
-    page.querySelector(`[data-category="${button.dataset.category}"]`).focus({preventScroll:true});
+  if (button.hasAttribute('data-feed-stage')) {
+    feedOptions.stage = button.dataset.feedStage;
+    renderFeed();
+    restoreFeedFocus('[data-feed-stage][aria-pressed="true"]');
+  }
+  if (button.hasAttribute('data-feed-clear')) {
+    Object.assign(feedOptions,feedDefaults);
+    renderFeed();
+    restoreFeedFocus('[data-feed-query]');
+  }
+  if (button.hasAttribute('data-vote')) {
+    if (!state.signedIn) return openBox('Upvote a product','<p>Log in to support a product you’d like other founders to discover.</p><a class="primary account-cta" href="/account">Log in</a>');
+    const id = Number(button.dataset.vote);
+    const product = state.products.find(p=>p.id===id);
+    button.disabled = true;
+    try {
+      await post({action:'vote',id,active:!product.voted});
+      restoreFeedFocus('[data-vote="'+id+'"]');
+    } catch(error) {
+      button.disabled=false;
+      openBox('Couldn’t update your vote','<p>'+esc(error.message)+'</p>');
+    }
   }
   if (button.hasAttribute('data-explore')) {
     modal.close();
@@ -156,4 +200,18 @@ page.addEventListener('pointerout', event => {
     hero.style.removeProperty('--flight-rx'); hero.style.removeProperty('--flight-ry');
   }
 });
-sync().catch(error=>page.textContent=error.message);
+sync().then(() => {
+  const url=new URL(location.href);
+  const reviewId=url.searchParams.get('review');
+  if (reviewId && /^[1-9][0-9]*$/.test(reviewId)) {
+    detail(Number(reviewId));
+    url.searchParams.delete('review');
+    history.replaceState(null,'',url.pathname+url.search+url.hash);
+  }
+  if (location.hash==='#directory') document.querySelector('#directory')?.scrollIntoView();
+}).catch(error => {
+  const status = document.createElement('p');
+  status.setAttribute('role','alert');
+  status.textContent = error.message;
+  page.append(status);
+});

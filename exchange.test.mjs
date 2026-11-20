@@ -31,9 +31,11 @@ test('review exchange, listing eligibility, and private founder feedback', async
   db.close();
 });
 
-test('information pages, account and private/public search settings', async () => {
+test('information pages, account and private/public search settings', async t => {
+  const db = createLocalDatabase();
+  t.after(() => db.close());
   const origin = 'https://pitchadda.example';
-  const page = (path, env = {}, headers = {}) => app.fetch(new Request(origin + path, {headers}), env);
+  const page = (path, env = {}, headers = {}) => app.fetch(new Request(origin + path, {headers}), {DB:db, ...env});
   const paths = ['/', '/about', '/privacy', '/terms', '/disclaimer', '/help'];
   for (const path of paths) {
     const response = await page(path);
@@ -114,4 +116,86 @@ test('email sign-in sends a PKCE challenge and verifies the resulting account wi
   const session=confirm.headers.getSetCookie()[0].split(';')[0];
   const account=await app.fetch(new Request(origin+'/account',{headers:{Cookie:session}}),env);
   assert.match(await account.text(),/reader@example\.test/);
+});
+
+test('launch discovery preserves older listings, vote ownership and public-page privacy', async t => {
+  const origin = 'https://pitchadda.example';
+  const db = createLocalDatabase();
+  t.after(() => db.close());
+
+  // Reproduce a real listing saved by the previous release.
+  db.prepare('CREATE TABLE products(id INTEGER PRIMARY KEY, owner TEXT, name TEXT, category TEXT, description TEXT, url TEXT, questions TEXT)').run();
+  db.prepare('INSERT INTO products VALUES(?,?,?,?,?,?,?)')
+    .bind(4, 'original-founder', 'Existing Project', 'Tools', 'A helpful tool', 'https://example.com', JSON.stringify(['First question?', 'Second question?'])).run();
+
+  function request(path, { body, user, publicMode = false } = {}) {
+    const headers = {Origin: origin};
+    if (user) headers['oai-authenticated-user-id'] = user;
+    return app.fetch(new Request(origin + path, {
+      headers, method: body ? 'POST' : 'GET', body: JSON.stringify(body),
+    }), {DB: db, PUBLIC_INDEXING: String(publicMode)});
+  }
+
+  async function product(id, user) {
+    const response = await request('/api', {user});
+    return (await response.json()).products.find(item => item.id === id);
+  }
+  const vote = (user, active) => request('/api', {user, body: {action:'vote', id:4, active}});
+  assert.equal((await product(1)).stage, 'Practice brief');
+  assert.equal((await product(4)).stage, 'Launched');
+  assert.equal((await vote(undefined, true)).status, 401);
+  assert.equal((await vote('original-founder', true)).ok, false);
+  assert.equal((await vote('reader', 'true')).ok, false);
+  for (const reader of ['reader', 'reader', 'another-reader']) {
+    assert.equal((await vote(reader, true)).status, 200);
+  }
+  assert.equal((await product(4)).votes, 2);
+  assert.equal(Boolean((await product(4)).voted), false);
+  assert.equal(Boolean((await product(4,'reader')).voted), true);
+  for (let attempt = 0; attempt < 2; attempt++) {
+    assert.equal((await vote('reader', false)).status, 200);
+  }
+  assert.equal((await product(4)).votes, 1);
+  assert.equal(Boolean((await product(4, 'reader')).voted), false);
+  assert.equal(Boolean((await product(4, 'another-reader')).voted), true);
+  const exported = await (await request('/account/export', {user:'reader'})).json();
+  assert.deepEqual(exported.votes, []);
+
+  const review = {action:'review', rating:'5', intent:'Would pay', note:'Private founder feedback', a0:'Private answer A', a1:'Private answer B'};
+  for (const id of [1, 2, 4]) {
+    assert.equal((await request('/api', {user:'reviewer', body:{...review,id}})).status, 200);
+  }
+  const listing = {action:'list', name:'Beta Product', category:'Tools', description:'Seeking early adopters',
+    url:'https://example.com/beta', q1:'Who would use this?', q2:'What should change?', stage:'Early access'};
+  assert.equal((await request('/api', {user:'reviewer',body:{...listing,stage:'Invalid stage'}})).ok, false);
+  assert.equal((await request('/api', {user:'reviewer',body:listing})).status, 200);
+  assert.equal((await product(5)).stage, 'Early access');
+
+  for (const publicMode of [false,true]) {
+    const response = await request('/p/4', {publicMode});
+    assert.equal(response.status, 200);
+    const html = await response.text();
+    assert.ok(html.includes(origin + '/p/4'));
+    assert.ok(html.includes('Existing Project'));
+    assert.ok(html.includes('/?review=4#directory'));
+    assert.match(html, publicMode ? /content="index, follow"/ : /content="noindex, nofollow"/);
+    assert.doesNotMatch(html,/Private founder feedback|Private answer|original-founder|another-reader/);
+  }
+  const beta = await request('/p/5');
+  assert.match(await beta.text(), /Early access/);
+
+  const updateStage = user => request('/api', {
+    user, body: {action:'set-stage', id:5, stage:'Launched'},
+  });
+  assert.equal((await updateStage()).status, 401);
+  assert.equal((await updateStage('another-founder')).ok, false);
+  assert.equal((await product(5)).stage, 'Early access');
+  assert.equal((await updateStage('reviewer')).status, 200);
+  assert.equal((await product(5)).stage, 'Launched');
+  assert.match(await (await request('/p/5')).text(), /Launched/);
+
+  assert.equal((await request('/p/98765')).status, 404);
+  assert.equal((await request('/sitemap.xml')).status, 404);
+  const publicSitemap = await (await request('/sitemap.xml', {publicMode:true})).text();
+  for (const id of [4,5]) assert.ok(publicSitemap.includes('<loc>' + origin + '/p/' + id + '</loc>'));
 });

@@ -35,7 +35,7 @@ const escapeMarkup = value => String(value).replace(/[<>&"']/g, char =>
   ({'<':'&lt;', '>':'&gt;', '&':'&amp;', '"':'&quot;', "'":'&#39;'}[char]));
 
 export function robotsTag(path, env = {}) {
-  return env.PUBLIC_INDEXING === 'true' && Object.hasOwn(pageDetails, path)
+  return env.PUBLIC_INDEXING === 'true' && (Object.hasOwn(pageDetails, path) || /^\/p\/[1-9]\d*$/.test(path))
     ? 'index, follow' : 'noindex, nofollow';
 }
 
@@ -85,7 +85,7 @@ export function applyHomeSeo(html, origin, env) {
   return html.replace('<!-- PAGE_METADATA -->', () => seoHead('/', origin, env));
 }
 
-export function seoRoute(path, origin, env = {}) {
+export function seoRoute(path, origin, env = {}, productIds = []) {
   const published = env.PUBLIC_INDEXING === 'true';
   if (path === '/robots.txt') {
     const rules = published
@@ -99,7 +99,8 @@ export function seoRoute(path, origin, env = {}) {
   if (!published) return new Response('Sitemap is available on public launch.', {
     status: 404, headers: {'X-Robots-Tag': 'noindex'},
   });
-  const entries = Object.keys(pageDetails).map(route =>
+  const productPaths = productIds.filter(id => Number.isSafeInteger(id) && id > 0).map(id => '/p/' + id);
+  const entries = [...new Set([...Object.keys(pageDetails), ...productPaths])].map(route =>
     '<url><loc>' + escapeMarkup(new URL(route, origin).href) + '</loc></url>');
   return new Response('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + entries.join('') + '</urlset>', {
     headers: {'Content-Type':'application/xml; charset=utf-8', 'X-Robots-Tag':'noindex'},
