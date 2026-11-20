@@ -4,6 +4,11 @@ const pageDetails = {
     description: 'Discover independent products from India’s founders. Review three products, list your own, and learn from peer ratings, written feedback and waitlist interest.',
     type: 'WebPage',
   },
+  '/demo': {
+    title: 'Interactive demo | PitchAdda',
+    description: 'Try a sample product review and see how a founder receives ratings, written feedback and interest signals.',
+    type: 'WebPage',
+  },
   '/about': {
     title: 'About PitchAdda | A feedback exchange for founders',
     description: 'Learn how PitchAdda helps India’s founders exchange structured product reviews, collect early interest and find out what to improve.',
@@ -46,7 +51,7 @@ export function seoHead(path, origin, env = {}) {
   const website = { '@id': home + '#website' };
   const publisher = { '@id': home + '#organization' };
   const graph = [
-    { '@type': 'Organization', ...publisher, name: 'PitchAdda', url: home },
+    { '@type': 'Organization', ...publisher, name: 'PitchAdda', url: home, founder: {'@type':'Person', name:'Pratik Kumar', sameAs:['https://github.com/itspsr','https://www.linkedin.com/in/databypratik/']} },
     { '@type': 'WebSite', ...website, name: 'PitchAdda', url: home, inLanguage: 'en', publisher },
     {
       '@type': info.type, '@id': canonical + '#page', url: canonical, name: info.title,

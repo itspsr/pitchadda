@@ -2,7 +2,7 @@ const page = document.querySelector('#page');
 const modal = document.querySelector('#modal');
 const message = document.querySelector('#message');
 const covers = [...document.querySelector('#covers').content.children];
-const homeHero = page.querySelector('.hero').outerHTML;
+const homeHero = page.querySelector('.studio-hero').outerHTML;
 let state;
 const feedDefaults = {query:'', stage:'', category:'', sort:'latest'};
 const feedOptions = {...feedDefaults};
@@ -50,7 +50,7 @@ function render() {
   }
   page.innerHTML = homeHero + '<div class="discovery-layout"><div id="feed-root"></div>' +
     '<aside class="board-aside" aria-label="Founder resources">' + progress() +
-    '<div class="board-guide"><h2>How the exchange works</h2><ol><li>Try a product and answer the founder’s questions.</li><li>Review three products to unlock your listing.</li><li>Track interest and feedback in your dashboard.</li></ol><a href="/help">Visit the help center</a></div></aside></div>';
+    '<div class="board-guide"><h2>Who is PitchAdda for?</h2><p><strong>For founders</strong><br>Find out what early users understand, where they get stuck and whether they would pay.</p><p><strong>For early adopters</strong><br>Discover new products from India, try them early and help shape what gets built.</p><a href="/demo">Try a sample review</a></div></aside></div>';
   renderFeed();
 }
 function renderFeed() {
@@ -188,14 +188,14 @@ window.addEventListener('hashchange', () => {
 const motion = matchMedia('(prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine)');
 page.addEventListener('pointermove', event => {
   if (!motion.matches) return;
-  const hero = event.target.closest('.hero');
+  const hero = event.target.closest('.studio-hero');
   if (!hero) return;
   const rect = hero.getBoundingClientRect();
   hero.style.setProperty('--flight-ry', ((event.clientX-rect.left)/rect.width*16-8)+'deg');
   hero.style.setProperty('--flight-rx', (6-(event.clientY-rect.top)/rect.height*12)+'deg');
 });
 page.addEventListener('pointerout', event => {
-  const hero = event.target.closest('.hero');
+  const hero = event.target.closest('.studio-hero');
   if (hero && !hero.contains(event.relatedTarget)) {
     hero.style.removeProperty('--flight-rx'); hero.style.removeProperty('--flight-ry');
   }

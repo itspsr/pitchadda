@@ -15,3 +15,9 @@ To enable optional email sign-in, configure `SUPABASE_URL` and `SUPABASE_PUBLISH
 ## Search and sharing
 
 The home, About, Help, Privacy, Terms and Disclaimer pages have server-rendered HTML, canonical URLs, JSON-LD and a social preview image. Private deployments use noindex and disallow crawling. On a public deployment, set `PUBLIC_INDEXING=true` and redeploy to publish the indexable page metadata and sitemap at `/sitemap.xml`. This setting controls crawler instructions. Site audience is managed separately through hosting access controls.
+
+## Live site
+
+[PitchAdda](https://pitchadda.fairpitch1.chatgpt.site) is open to visitors. [Try the interactive demo](https://pitchadda.fairpitch1.chatgpt.site/demo) to see how a sample review affects the founder dashboard. Demo inputs live only in the page and never enter the exchange. Appearance preferences persist in the visitor’s browser.
+
+Made by Pratik Kumar · [GitHub](https://github.com/itspsr) · [LinkedIn](https://www.linkedin.com/in/databypratik/)

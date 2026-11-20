@@ -5,6 +5,7 @@ const infoPages = new Map([
     title: 'About PitchAdda',
     intro: 'PitchAdda gives independent founders in India a place to test an idea with people who are building products of their own.',
     sections: [
+      ['Made by Pratik Kumar', 'PitchAdda is a founder feedback exchange by Pratik Kumar. Founders can publish a product and ask questions, and early adopters can try releases and share what they think.', 'https://github.com/itspsr', 'Find Pratik on GitHub'],
       ['Finding a launch', 'Search the launch board by product name, category or description. Choose Early access to find products looking for testers, or Top voted to see community favorites. Open a product’s name for its shareable page.'],
       ['How the exchange works', 'Choose a product, answer the founder’s questions and share a rating. After reviewing three different products, you can list yours with a link, a short description and up to three questions.'],
       ['What founders learn', 'Your dashboard brings together ratings, written responses and waitlist interest. Read the answers alongside the numbers to understand what someone found useful, what confused them and what they would change.'],
@@ -85,5 +86,5 @@ a{color:#304dcc;text-decoration:none}a:hover{text-decoration:underline}a:focus-v
 h1,h2{font-family:Georgia,serif;font-weight:500;line-height:1.15;letter-spacing:-.045em}h1{font-size:clamp(2.65rem,5vw,4.25rem);margin:0 0 18px}.intro{font-size:1.18rem;color:#49566e;margin:0 0 30px}section{border-top:1px solid #dbe0e8;padding:22px 0}h2{font-size:1.6rem;margin:0 0 8px}p{margin:0;color:#37445c}.action{display:inline-block;margin-top:10px;padding:9px 17px;background:#304dcc;color:white;border-radius:8px;font-weight:650}
 @media(max-width:700px){.layout{display:flex;flex-direction:column;gap:28px;padding-top:22px}nav{flex-direction:row;flex-wrap:wrap;gap:4px}nav a{font-size:.9rem;padding:4px 8px}.head{gap:.7rem;min-height:62px;flex-wrap:wrap;padding-block:8px}.brand{font-size:1.3rem}.head>a:not(.brand){font-size:.86rem}}
 </style></head><body><header><div class="wrap head"><a class="brand" href="/" aria-label="PitchAdda home"><span aria-hidden="true"><i></i><i></i><i></i></span>PitchAdda</a><a href="/#discover">Discover</a><a href="/#dashboard">Dashboard</a><a href="/account">Account</a></div></header>
-<div class="wrap layout"><nav aria-label="Help and information">${links}</nav><main><h1>${label}</h1><p class="intro">${escapeInfo(page.intro)}</p>${sections}${path === '/about' ? '<a class="action" href="/#directory">Explore products</a>' : ''}</main></div></body></html>`;
+<div class="wrap layout"><nav aria-label="Help and information">${links}</nav><main><h1>${label}</h1><p class="intro">${escapeInfo(page.intro)}</p>${sections}${path === '/about' ? '<a class="action" href="/demo">Try the demo</a> <a href="https://www.linkedin.com/in/databypratik/" rel="me">Pratik on LinkedIn</a>' : ''}</main></div></body></html>`;
 }

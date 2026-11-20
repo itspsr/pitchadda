@@ -1,3 +1,4 @@
+import { injectTheme } from './theme.mjs';
 const ACCOUNT_PATH = '/account';
 const SESSION_COOKIE = '__Host-pitchadda-access';
 const PROOF_COOKIE = '__Host-pitchadda-proof';
@@ -35,7 +36,7 @@ function accountPage(title, body, status = 200) {
     <style>*{box-sizing:border-box}body{margin:0;color:#19233c;background:#f7f8fc;font:1rem/1.55 Inter,Arial,sans-serif}.wrap{width:min(92%,1080px);margin:auto}header{border-bottom:1px solid #dce1ea;background:white;padding:16px 0}.brand{color:#19233c;text-decoration:none;font-size:1.5rem;letter-spacing:-1px;font-weight:800}.card{background:white;border:1px solid #dce1ea;border-radius:18px;max-width:480px;margin:9vh auto 3rem;padding:clamp(22px,5vw,40px);box-shadow:0 10px 36px #2633550c}.card h1{font:500 2.5rem/1.12 Georgia,serif;letter-spacing:-.05em;margin:0 0 .8rem}.card p{color:#4d596e;overflow-wrap:anywhere}.action,button{display:inline-block;padding:.65rem 1rem;background:#304dcc;border:0;border-radius:8px;color:white;text-decoration:none;font:600 1rem/1.4 Inter,Arial,sans-serif;cursor:pointer}a{color:#304dcc}form{margin-top:1.3rem}label{font-weight:650}input{display:block;width:100%;padding:.65rem;border:1px solid #a4aec2;border-radius:7px;margin:.4rem 0 .75rem;font:inherit}a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #758aff;outline-offset:3px}.links{display:flex;gap:1rem;flex-wrap:wrap;font-size:.9rem;margin-top:1.5rem}</style></head>
     <body><header><div class="wrap"><a class="brand" href="/">PitchAdda</a></div></header><main class="wrap"><section class="card"><h1>${escapeHtml(title)}</h1>${body}
     <div class="links"><a href="/">Discover products</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a></div></section></main></body></html>`;
-  return new Response(page, {status,headers:{'content-type':'text/html; charset=utf-8','cache-control':'private, no-store','referrer-policy':'no-referrer'}});
+  return new Response(injectTheme(page), {status,headers:{'content-type':'text/html; charset=utf-8','cache-control':'private, no-store','referrer-policy':'no-referrer'}});
 }
 
 function proofValue(bytes) {

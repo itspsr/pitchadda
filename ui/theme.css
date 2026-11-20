@@ -1,0 +1,108 @@
+:root {
+  --surface: #fff;
+  --surface-raised: #f3f4f7;
+  --surface-control: #fff;
+  --control-ink: #32353d;
+  --control-line: #cdd0d8;
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #101114;
+  --surface: #191b20;
+  --surface-raised: #202329;
+  --surface-control: #252830;
+  --control-ink: #e3e6ed;
+  --control-line: #494f5e;
+  --ink: #f2f3f6;
+  --muted: #b2bac9;
+  --blue: #a8bbff;
+  --line: #343842;
+}
+.appearance-control {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  margin: 0;
+  color: var(--control-ink);
+  line-height: 1;
+}
+.appearance-control .appearance-glyph {
+  position: absolute;
+  left: .63rem;
+  width: .82rem;
+  height: .82rem;
+  background: linear-gradient(90deg, currentColor 50%, transparent 50%);
+  border: 1.4px solid currentColor;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.appearance-control select {
+  appearance: none;
+  display: block;
+  width: 6.8rem;
+  min-height: 2.35rem;
+  margin: 0;
+  padding: .45rem 1.35rem .45rem 1.8rem;
+  border: 1px solid var(--control-line);
+  border-radius: 100px;
+  background-color: var(--surface-control);
+  color: var(--control-ink);
+  font: 600 .85rem/1.25 system-ui, sans-serif;
+  cursor: pointer;
+}
+.appearance-control::after {
+  position: absolute;
+  right: .7rem;
+  top: 45%;
+  width: .35rem;
+  height: .35rem;
+  border: solid currentColor;
+  border-width: 0 1.4px 1.4px 0;
+  transform: rotate(45deg);
+  content: "";
+  pointer-events: none;
+}
+.appearance-control select:focus-visible { outline: 3px solid #728df1; outline-offset: 3px; }
+header > .wrap:has(> .brand + .appearance-control) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+html[data-theme="dark"] body { background: var(--paper); color: var(--ink); }
+html[data-theme="dark"] :is(header,.site-header,.card,.panel,.progress,.lb-list,.empty,dialog) {
+  background-color: var(--surface);
+  color: var(--ink);
+  border-color: var(--line);
+}
+html[data-theme="dark"] :is(.board-guide,.close,.lb-tabs button:hover:not([aria-pressed="true"])) {
+  background: var(--surface-raised); color: var(--ink); border-color: var(--line);
+}
+html[data-theme="dark"] :is(header .brand,header a,.lb-copy h3 a,.card h3,footer span) { color: var(--ink); }
+html[data-theme="dark"] :is(.layout nav a,.layout main p,.intro,.lb-details,.lb-byline,.card p,.card-meta,footer a,.tag,.feedback small) { color: var(--muted); }
+html[data-theme="dark"] :is(.layout main section,footer,dl>div) { border-color: var(--line); }
+html[data-theme="dark"] :is(.layout nav a[aria-current],.progress-icon,.card button,.lb-vote[aria-pressed="true"]) { color: #c4d1ff; background: #2c3756; }
+html[data-theme="dark"] :is(a,.category,.lb-review,.lb-byline>span:first-child,.lb-results button) { color: var(--blue); }
+html[data-theme="dark"] :is(.hero-button,.actions .review) { color: #18213b; }
+html[data-theme="dark"] .actions a:not(.review) { color: #eff2ff; }
+html[data-theme="dark"] :is(.primary,.header-cta,.action,form button:not(.close)) { background: #506dd5; color: white; }
+html[data-theme="dark"] :is(.primary,.header-cta,.action,form button:not(.close)):hover { background: #4560c5; color: white; }
+html[data-theme="dark"] :is(.lb-vote,.lb-selects select,.lb-search input,input,textarea,select) { background-color: var(--surface-control); border-color: var(--control-line); color: var(--control-ink); }
+html[data-theme="dark"] ::placeholder { color: #a8afbf; }
+html[data-theme="dark"] .lb-glass { border-color: var(--muted); }
+html[data-theme="dark"] .lb-glass:after { background-color: var(--muted); }
+html[data-theme="dark"] .lb-tabs button[aria-pressed="true"] { background: #e3e6ed; color: #181b24; }
+html[data-theme="dark"] .segments i { background: #353b49; }
+html[data-theme="dark"] .segments i.on { background: var(--blue); }
+html[data-theme="dark"] dialog::backdrop { background: #000b; }
+html[data-theme="dark"] #message { color: #ffb499; }
+@media(max-width:740px) {
+  header > div:has(.appearance-control) { flex-wrap: wrap; gap: .6rem 1rem; padding-block: .65rem; }
+  .header-inner nav { order: 3; width: 100%; }
+}
+@media(max-width:450px) {
+  .appearance-control select { min-height: 2.2rem; }
+  header > div:has(.appearance-control) { gap: .4rem .65rem; }
+}
+html[data-theme="dark"] .studio-hero .studio-actions .studio-demo{color:#101622;background:#eef2ff}
+html[data-theme="dark"] .studio-hero .studio-actions .studio-browse{color:#dee6fe}

@@ -199,3 +199,34 @@ test('launch discovery preserves older listings, vote ownership and public-page 
   const publicSitemap = await (await request('/sitemap.xml', {publicMode:true})).text();
   for (const id of [4,5]) assert.ok(publicSitemap.includes('<loc>' + origin + '/p/' + id + '</loc>'));
 });
+
+test('studio homepage, shared appearance control and public interactive demo', async () => {
+  const origin='https://pitchadda.example';
+  const env={PUBLIC_INDEXING:'true',DB:createLocalDatabase()};
+  const page=path=>app.fetch(new Request(origin+path),env);
+  try {
+    for(const path of ['/','/account','/demo','/p/1','/privacy','/about']) {
+      const res=await page(path);
+      assert.equal(res.status,200);
+      const html=await res.text();
+      assert.match(html,/<select aria-label="Appearance" data-appearance-choice>/);
+      assert.match(html,/pitchadda\.appearance/);
+      if(path==='/') {
+        assert.match(html,/src="\/studio-display.webp"/);
+        assert.match(html,/Made by Pratik Kumar/);
+        assert.match(html,/https:\/\/www.linkedin.com\/in\/databypratik\//);
+        assert.match(html,/href="\/demo"/);
+      }
+      if(path==='/demo') {
+        assert.match(html,/Sample founder dashboard/);
+        assert.match(html,/id="demo-form"/);
+        assert.match(html,/content="index, follow"/);
+        assert.match(html,/rel="canonical" href="https:\/\/pitchadda.example\/demo"/);
+      }
+    }
+    const image=await page('/studio-display.webp');
+    assert.equal(image.headers.get('content-type'),'image/webp');
+    assert.equal(Buffer.from(await image.arrayBuffer()).subarray(8,12).toString(),'WEBP');
+    assert.match(await (await page('/sitemap.xml')).text(),/\/demo<\/loc>/);
+  } finally {env.DB.close();}
+});

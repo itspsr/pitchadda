@@ -2,6 +2,9 @@ import { accountRoute, resolveAccount } from './auth.mjs';
 import { applyHomeSeo, robotsTag, seoRoute } from './seo.mjs';
 import { renderInfo } from './info.mjs';
 import { renderProductPage } from './product-page.mjs';
+import { injectTheme } from './theme.mjs';
+import { renderDemo } from './demo-page.mjs';
+import studioDisplay from './assets/studio-display.webp';
 import shareImage from './assets/social.png';
 
 const seeds=[
@@ -29,7 +32,7 @@ const productStats = `
 const productTables = 'FROM products p LEFT JOIN product_stages s ON s.product=p.id';
 
 function htmlResponse(html, req, env, path) {
-  return new Response(req.method === 'HEAD' ? null : html, {headers:{
+  return new Response(req.method === 'HEAD' ? null : injectTheme(html), {headers:{
     'Content-Type':'text/html;charset=utf-8',
     'X-Robots-Tag':robotsTag(path,env),
     'X-Content-Type-Options':'nosniff'
@@ -40,6 +43,10 @@ export default {async fetch(req,env){
  const url=new URL(req.url);
  const path=url.pathname;
  const readable=req.method==='GET'||req.method==='HEAD';
+ if(readable && path==='/studio-display.webp'){
+   return new Response(req.method==='HEAD'?null:studioDisplay,{headers:{'Content-Type':'image/webp','Cache-Control':'public, max-age=3600'}});
+ }
+ if(readable && path==='/demo')return htmlResponse(renderDemo(url.origin,env),req,env,path);
  if(readable && path==='/social.png'){
    return new Response(req.method==='HEAD'?null:shareImage,{headers:{'Content-Type':'image/png','Cache-Control':'public, max-age=3600'}});
  }
